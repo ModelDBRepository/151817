@@ -1,0 +1,67 @@
+func an() {
+	if ($1 == -66) {
+		return (0.007*(65.99-66)/(exp((65.99-66)/1.4)-1))
+	} else {
+		return (0.007*(-1*$1-66)/(exp((-1*$1-66)/1.4)-1))
+	}
+}
+
+func bn() {
+	return (0.37*exp((-1*$1-66)/35))
+}
+
+func ninf() {
+	return (an($1)/(an($1)+bn($1)))
+}
+
+func amS() {
+	return (0.5*(-1*$1-33)/(exp((-1*$1-33)/4)-1))
+}
+
+func bmS() {
+	return (2.4*exp((-1*$1-65)/21))
+}
+
+func ahS() {
+	return (1.1*exp((-1*$1-65)/8))
+}
+
+func bhS() {
+	return (1/(exp((-1*$1-50)/4)+1))
+}
+
+func minfS() {
+	return (amS($1)/(amS($1)+bmS($1)))
+}
+
+func hinfS() {
+	return (ahS($1)/(ahS($1)+bhS($1)))
+}
+
+func amR() {
+	if ($1 == -54) {
+		return (0.25*(53.99-54)/(exp((53.99-54)/2.3)-1))
+	} else {
+		return (0.25*(-1*$1-54)/(exp((-1*$1-54)/2.3)-1))
+	}
+}
+
+func bmR() {
+	return (0.86*exp((-1*$1-66)/29))
+}
+
+func ahR() {
+	return (0.025*exp((-1*$1-65)/10.5))
+}
+
+func bhR() {
+	return (1.6/(exp((-1*$1-43)/31)+1))
+}
+
+func minfR() {
+	return (amR($1)/(amR($1)+bmR($1)))
+}
+
+func hinfR() {
+	return (ahR($1)/(ahR($1)+bhR($1)))
+}

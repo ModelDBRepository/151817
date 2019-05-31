@@ -1,0 +1,32 @@
+elvis_permute = 0
+
+load_file("nrngui.hoc")
+xpanel("Which form of TTXR to run?")
+xlabel("TTXR currents available")
+xradiobutton ("Normal TTXR", "elvis_permute = 0", 1)
+xradiobutton ("Positive-shifted TTXR", "elvis_permute = 1")
+xradiobutton ("Negative-shifted TTXR", "elvis_permute = 2")
+xbutton ("Apply", "finish_load()")
+xpanel()
+
+proc finish_load() {
+	if (elvis_permute == 0) {
+		load_file ("elvis.ses")
+	}
+	if (elvis_permute == 1) {
+		load_file ("elvisp10.ses")
+	}
+	if (elvis_permute == 2) {
+		load_file ("elvism10.ses")
+	}
+
+
+	load_file ("hvas.ses")
+	load_file ("kchannels.ses")
+	load_file ("leak.ses")
+	load_file ("soma.hoc")
+	load_file ("iclamp.hoc")
+	load_file ("graphs.hoc")
+	load_file ("runner.hoc")
+	load_file ("gui_controller.hoc")
+}

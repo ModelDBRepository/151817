@@ -1,0 +1,7 @@
+objectvar g
+g = new Graph(0)
+g.addexpr("soma.v(0.5)",1,1)
+g.view(2)
+/* g.exec_menu("Keep Lines") */
+
+graphList[0].append(g)

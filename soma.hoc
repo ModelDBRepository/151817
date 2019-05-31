@@ -1,0 +1,12 @@
+create soma
+soma {
+	diam=12
+	L=6
+	nseg=1
+	cm=1
+	
+	insert TTXR
+	insert TTXS
+	insert K
+	insert leak
+}

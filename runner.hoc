@@ -1,0 +1,313 @@
+tstop = 150
+v_init = -55
+stim_low = 0.0005
+stim_high = 1
+stim_inc = 0.0001
+Vm_low = -91
+Vm_high = -49
+Vm_inc = 1
+config = 0
+resolution = 100
+framelen = 10
+compConduct = 0
+compLeak = 0
+baseLeak = 0
+conduct_config = 0
+percent_step = 10
+max_percent = 200
+conduct_scale = 30
+conduct_stim = 0.001
+
+objref vec, fSR, fR, fS, fK, fStim, fPlay, fWriter
+vec = new Vector()
+vec.record(&soma.v(0.5))
+fSR = new File()
+fS = new File()
+fR = new File()
+fK = new File()
+fStim = new File()
+fPlay = new File()
+fWriter = new File()
+
+
+func INa() {
+	/* return (gmax_TTXS*(minfS($1))^3*hinfS($1)*($1-e_TTXS)+gmax_TTXR*(minfR($1))^3*hinfR($1)*($1-e_TTXR)) */
+	finitialize($1)
+	return (i_TTXR + i_TTXS)
+}
+
+func IK() {
+	/* return (gmax_K*(ninf($1))^4*($1-e_K)) */
+	finitialize($1)
+	return (i_K)
+}
+
+proc adjust_leak() {
+	ss_curr = -1*INa(v_init)-IK(v_init)
+/*	print v_init
+	print ss_curr
+	print "e_TTXS ", e_TTXS
+	print "e_TTXR ", e_TTXR
+	print "minfS ", minfS(v_init)
+	print "hinfS ", hinfS(v_init)
+	print "minfR ", minfR(v_init)
+	print "hinfR ", hinfR(v_init)
+	print "ninf ", ninf(v_init) */
+	if (ss_curr > 0) {
+		e_leak = v_init - 5
+	} else {
+		e_leak = v_init + 5
+	}
+	gmax_leak = (-1*INa(v_init)-IK(v_init))/(v_init-e_leak)
+}
+
+
+proc start_sim() {
+	vmstore = v_init
+	v_init = -55
+	adjust_leak()
+	v_init = vmstore
+	stdinit()
+	run()
+	g.exec_menu("View = plot")
+}
+
+proc adj_start_sim() {
+	adjust_leak()
+	stdinit()
+	run()
+	g.exec_menu("View = plot")
+	fWriter.wopen ("writer.txt")
+	vec.printf(fWriter,"%5.1f\t")
+	fWriter.close()
+}
+
+proc run_batch_stims() {
+	
+	fSR.wopen("SR.txt")
+	gmax_TTXR = 0.00987
+	gmax_TTXS = 0.00987
+	stim_mag = stim_low
+	for (i=stim_low; i <= stim_high; i=i+stim_inc) {
+		stim.amp = stim_mag
+		adj_start_sim()
+		vec.printf(fSR,"%5.1f\t")
+		stim_mag = stim_mag + stim_inc
+	}
+	fSR.close()
+	
+	fS.wopen("S.txt")
+	gmax_TTXR = 0
+	gmax_TTXS = 0.00987
+	stim_mag = stim_low
+	for (i=stim_low; i <= stim_high; i=i+stim_inc) {
+		stim.amp = stim_mag
+		adj_start_sim()
+		vec.printf(fS,"%5.1f\t")
+		stim_mag = stim_mag + stim_inc
+	}
+	fS.close()
+	
+	fR.wopen("R.txt")
+	gmax_TTXR = 0.00987
+	gmax_TTXS = 0
+	stim_mag = stim_low
+	for (i=stim_low; i <= stim_high; i=i+stim_inc) {
+		stim.amp = stim_mag
+		adj_start_sim()
+		vec.printf(fR,"%5.1f\t")
+		stim_mag = stim_mag + stim_inc
+	}
+	fR.close()
+	
+	fK.wopen("K.txt")
+	gmax_TTXR = 0
+	gmax_TTXS = 0
+	stim_mag = stim_low
+	for (i=stim_low; i <= stim_high; i=i+stim_inc) {
+		stim.amp = stim_mag
+		adj_start_sim()
+		vec.printf(fK,"%5.1f\t")
+		stim_mag = stim_mag + stim_inc
+	}
+	fK.close()	
+	
+	gmax_TTXR = 0.00987
+	gmax_TTXS = 0.00987
+}
+
+proc run_batch_Vms() {
+
+	fSR.wopen("SR.txt")
+	gmax_TTXR = 0.00987
+	gmax_TTXS = 0.00987
+	v_init = Vm_low
+	for (i=Vm_low; i <= Vm_high; i=i+Vm_inc) {
+		adj_start_sim()
+		vec.printf(fSR,"%5.1f\t")
+		v_init = v_init + Vm_inc
+	}
+	fSR.close()
+	
+	fS.wopen("S.txt")
+	gmax_TTXR = 0
+	gmax_TTXS = 0.00987
+	v_init = Vm_low
+	for (i=Vm_low; i <= Vm_high; i=i+Vm_inc) {
+		adj_start_sim()
+		vec.printf(fS,"%5.1f\t")
+		v_init = v_init + Vm_inc
+	}
+	fS.close()
+	
+	fR.wopen("R.txt")
+	gmax_TTXR = 0.00987
+	gmax_TTXS = 0
+	v_init = Vm_low
+	for (i=Vm_low; i <= Vm_high; i=i+Vm_inc) {
+		adj_start_sim()
+		vec.printf(fR,"%5.1f\t")
+		v_init = v_init + Vm_inc
+	}
+	fR.close()
+	
+	fK.wopen ("K.txt")
+	gmax_TTXR = 0
+	gmax_TTXS = 0
+	v_init = Vm_low
+	for (i=Vm_low; i <= Vm_high; i=i+Vm_inc) {
+		adj_start_sim()
+		vec.printf(fK,"%5.1f\t")
+		v_init = v_init + Vm_inc
+	}
+	fK.close()
+	
+	gmax_TTXR = 0.00987
+	gmax_TTXS = 0.00987
+
+}
+
+func run_with_current() {
+
+	multiplier = compConduct + 1
+	
+	storeTTXR = gmax_TTXR
+	storeTTXS = gmax_TTXS
+	
+	if (config == 1) {
+		gmax_TTXR = 0
+		gmax_TTXS = storeTTXS * multiplier
+	} 
+	if (config == 2) {
+		gmax_TTXR = storeTTXR * multiplier
+		gmax_TTXS = 0
+	}
+	if (config == 3) {
+		gmax_TTXR = 0
+		gmax_TTXS = 0
+	}
+	
+	adj_start_sim()
+	
+	foundAP = 0
+	iStart = stim.del*steps_per_ms
+	iEnd = (stim.del+framelen)*steps_per_ms
+	for (i=iStart; i < iEnd; i=i+1) {
+		if (vec.x[i] > -20) {
+			foundAP = 1
+		}
+	}
+	print stim.amp, foundAP
+	
+	gmax_TTXR = storeTTXR
+	gmax_TTXS = storeTTXS
+	
+	return foundAP
+}
+
+func calc_base_leak() {
+	storeTTXR = gmax_TTXR
+	storeTTXS = gmax_TTXS
+	storeK = gmax_K
+	
+	gmax_TTXR = 0.00987
+	gmax_TTXS = 0.00987
+	gmax_K = 0.00571
+	
+	baseLeak = -1*INa(v_init)-IK(v_init)
+	
+	gmax_TTXR = storeTTXR
+	gmax_TTXS = storeTTXS
+	gmax_K = storeK
+}
+
+proc run_find_min_current() {
+	
+	leakCurrent = -1*INa(v_init)-IK(v_init)
+	adjustedStim = compLeak*(leakCurrent-baseLeak)
+	print adjustedStim
+	
+	stim_size = stim_high
+	stim.amp = stim_size + adjustedStim
+	
+	boundHigh = stim_high
+	boundLow = stim_high
+	
+	foundAP = run_with_current()
+	while (foundAP == 1) {
+		boundHigh = stim_size
+		stim_size = stim_size / 2
+		stim.amp = stim_size + adjustedStim
+		foundAP = run_with_current()
+	}
+	boundLow = stim_size
+	
+	stim_inc = boundLow / resolution
+	
+	stim_size = boundLow
+	stim.amp = stim_size
+	foundAP = run_with_current()
+	while (foundAP == 0 && stim_size <= boundHigh) {
+		stim_size = stim_size + stim_inc
+		stim.amp = stim_size + adjustedStim
+		foundAP = run_with_current()
+	}
+	min_stim = stim_size
+	fStim.printf("%5.1f\t",v_init)
+	fStim.printf("%1.8f\n",stim_size)
+
+}
+
+proc make_excitability_curve() {
+	fStim.wopen("stim.txt")
+	v_init = Vm_low
+	for (j=Vm_low; j <= Vm_high; j=j+Vm_inc) {
+		run_find_min_current()
+		print j
+		v_init = v_init + Vm_inc
+	}
+	fStim.close()
+}
+
+proc run_conductance_changes() {
+	fPlay.wopen ("play.txt")
+	stim.amp = conduct_stim
+	scaledTTXR = gmax_TTXR * conduct_scale
+	scaledTTXS = gmax_TTXS * conduct_scale
+	for (j=0; j <= max_percent; j=j+percent_step) {
+		if (conduct_config == 0) {
+			gmax_TTXR = scaledTTXR * 0.01 * j
+			gmax_TTXS = scaledTTXS
+		} else {
+			gmax_TTXS = scaledTTXS * 0.01 * j
+			gmax_TTXR = scaledTTXR
+		}
+		print gmax_TTXR, gmax_TTXS, j
+		adj_start_sim()
+		fPlay.printf("%5.1f\t",j)
+		vec.printf(fPlay,"%5.1f\t")
+	}
+	fPlay.close()
+	gmax_TTXR = 0.002438
+	gmax_TTXS = 0.002438
+}
